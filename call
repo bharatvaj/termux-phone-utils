@@ -1,0 +1,14 @@
+[ ! -f contacts.json ] && termux-contact-list >> ~/contacts.json
+
+export TERMUX_CONTACTS_LIST="$(cat ~/contacts.json)"
+
+export CNA="$(echo "${TERMUX_CONTACTS_LIST}" | jq -r '.[] | .name' | fzy)"
+
+[ "$CNA" == "" ] && echo "Not selected" && exit 1
+
+CONTACT_NUMBER=$(echo "${TERMUX_CONTACTS_LIST}" | jq -r ".[] | select(.name==\"$CNA\") | .number")
+if [ -n "${CONTACT_NUMBER}" ]; then
+    termux-telephony-call "${CONTACT_NUMBER}"
+else
+    termux-telephony-call "${CNA}"
+fi
